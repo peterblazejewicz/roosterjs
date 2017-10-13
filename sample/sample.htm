@@ -65,11 +65,13 @@
             .editorContainer {
                 height: 100%;
                 position: relative;
+                display: inline-block;
             }
 
             .tab {
                 display: none;
-                padding: 10px;
+                width: 50%;
+                padding: 10px 0px 10px 0px;
             }
 
             .tab.selected {
@@ -80,14 +82,49 @@
                 position: absolute;
                 word-wrap: break-word;
                 left: 10px;
-                right: 10px;
                 top: 10px;
                 bottom: 10px;
-                border: solid 1px #cccccc;
+                border: solid 2px #cccccc;
                 background-color: white;
                 overflow: auto;
                 outline: none;
+                width: 50%;
             }
+
+            .sampleCodeContainer {
+                position: absolute;
+                word-wrap: break-word;
+                right: 10px;
+                top: 10px;
+                bottom: 10px;
+                border: solid 2px #cccccc;
+                background-color: white;
+                overflow: auto;
+                outline: none;
+                float: right;
+                width: 50%;
+            }
+
+            .htmlSample {
+                word-wrap: break-word;
+                border: solid 2px #cccccc;
+                background-color: white;
+                overflow: auto;
+                outline: none;
+                height: 50%;
+                width: 100%;
+            }
+
+            .jsSample {
+                word-wrap: break-word;
+                border: solid 2px #cccccc;
+                background-color: white;
+                overflow: auto;
+                outline: none;
+                height: 50%;
+                width: 100%;
+            }
+
 
             .optionsTab {
                 display: flex;
@@ -207,6 +244,16 @@
                     <div>
                         4. Navigate to this demo using a web browser with the following url: <br>
                         &nbsp;&nbsp;&nbsp;&nbsp;<a href="http://localhost:3000/sample/sample.htm">http://localhost:3000/sample/sample.htm</a>
+                    </div>
+                </div>
+                <div class="sampleCodeContainer">
+                    <div class="htmlSample">
+                        <h2>HTML</h2>
+                        <div>HTML sample code</div>
+                    </div>
+                    <div class="jsSample">
+                        <h2>JS</h2>
+                        <div>JS sample code</div>
                     </div>
                 </div>
             </div>
