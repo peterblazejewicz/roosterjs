@@ -87,7 +87,7 @@
                 background-color: white;
                 overflow: auto;
                 outline: none;
-                width: 50%;
+                width: 60%;
             }
 
             .sampleCodeContainer {
@@ -101,7 +101,7 @@
                 overflow: auto;
                 outline: none;
                 float: right;
-                width: 48%;
+                width: 40%;
             }
 
             .htmlSample {
@@ -141,7 +141,6 @@
     </head>
     <body>
         <script src="scripts/sample.js"></script>
-        <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
         <div class="root">
             <div class="banner">
                 RoosterJs Sample Site
@@ -247,267 +246,9 @@
                 <div class="sampleCodeContainer">
                     <div class="htmlSample">
                         <h2>HTML Sample Code</h2>
-                        <xmp id="htmlSampleCode" class="prettyprint">
-<html>
-    <head>
-        <style>
-            .root {
-                display: flex;
-                flex-direction: column;
-                height: 100%;
-            }
-            .editorContainer {
-                height: 100%;
-                position: relative;
-            }
-            .codeSampleContainer {
-                height: 100%;
-                position: relative;
-                float: right;
-            }
-            .editor {
-                position: absolute;
-                left: 10px;
-                right: 10px;
-                top: 10px;
-                bottom: 10px;
-                border: solid 1px #cccccc;
-                background-color: white;
-                overflow: auto;
-                outline: none;
-            }
-            .formatBar {
-                flex-shrink: 0;
-                padding: 10px;
-                background-color: #ccc;
-                border-top: solid 1px #bbb;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="root">
-            <div class="editorContainer">
-                <div id='editorDiv' class="editor"></div>
-            </div>
-            <div class="codeSampleContainer">
-                <div id='editorDiv' class="editor"></div>
-            </div>
-            <div class="formatBar">
-                <button id="boldButton" title="Bold"><b>B</b></button>
-                <button id="italicButton" title="Italic"><i>I</i></button>
-                <button id="underlineButton" title="Underline"><u>U</u></button>
-                <button id="strikeThroughButton"><span style="text-decoration: line-through">StrikeThough</span></button>
-                &nbsp;
-                <select id="fontNameButton" title="Font Name">
-                    <option value="">Font Name</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Calibri">Calibri</option>
-                    <option value="Courier New">Courier New</option>
-                    <option value="Tahoma">Tahoma</option>
-                    <option value="Times New Roman">Times New Roman</option>
-                </select>
-                <select id="fontSizeButton" title="Font Size">
-                    <option value="">Font Size</option>
-                    <option value="8">8</option>
-                    <option value="10">10</option>
-                    <option value="12">12</option>
-                    <option value="16">16</option>
-                    <option value="20">20</option>
-                    <option value="36">36</option>
-                    <option value="72">72</option>
-                </select>
-                &nbsp;
-                <select id="textColorButton" title="Text Color">
-                    <option value="">Text Color</option>
-                    <option value="#757b80">Gray</option>
-                    <option value="#bd1398">Violet</option>
-                    <option value="#7232ad">Purple</option>
-                    <option value="#006fc9">Blue</option>
-                    <option value="#4ba524">Green</option>
-                    <option value="#e2c501">Yellow</option>
-                    <option value="#d05c12">Orange</option>
-                    <option value="#ff0000">Red</option>
-                    <option value="#ffffff">White</option>
-                    <option value="#000000">Black</option>
-                </select>
-                <select id="backColorButton" title="Back Color">
-                    <option value="">Back Color</option>
-                    <option value="#ffff00">Yellow</option>
-                    <option value="#00ff00">Green</option>
-                    <option value="#00ffff">Cyan</option>
-                    <option value="#ff00ff">Purple</option>
-                    <option value="#0000ff">Blue</option>
-                    <option value="#ff0000">Red</option>
-                    <option value="#bebebe">Gray</option>
-                    <option value="#bebebe">Dark Gray</option>
-                    <option value="#666666">White</option>
-                    <option value="#000000">Black</option>
-                </select>
-                &nbsp;
-                <button id="bulletButton">Bullet</button>
-                <button id="numberingButton">Numbering</button>
-                &nbsp;
-                <button id="indentButton">Indent</button>
-                <button id="outdentButton">Outdent</button>
-                &nbsp;
-                <button id="alignLeftButton">Left</button>
-                <button id="alignCenterButton">Center</button>
-                <button id="alignRightButton">Right</button>
-                &nbsp;
-                <button id="superScriptButton">X<sup>2</sup></button>
-                <button id="subScriptButton">X<sub>2</sub></button>
-                &nbsp;
-                <button id="insertLink">Inert Link</button>
-                &nbsp;
-                <button id="undoButton">Undo</button>
-                <button id="redoButton">Redo</button>
-                &nbsp;
-                <button id="clearFormatButton">ClearFormat</button>
-            </div>
-        </div>
-        <script src='editor.js'></script>
-    </body>
-</html>
-                        </xmp>
                     </div>
                     <div class="jsSample">
                         <h2>JS Sample Code</h2>
-                            <xmp class="prettyprint lang-js">
-var roosterjs = require('roosterjs');
-var editorDiv = document.getElementById('editorDiv');
-var editor = roosterjs.createEditor(editorDiv);
-editor.setContent('Welcome to <b>RoosterJs</b>!');
-
-// Bold
-document.getElementById('boldButton').addEventListener('click', function() {
-    roosterjs.toggleBold(editor);
-});
-
-// Italic
-document.getElementById('italicButton').addEventListener('click', function() {
-    roosterjs.toggleItalic(editor);
-});
-
-// Underline
-document.getElementById('underlineButton').addEventListener('click', function() {
-    roosterjs.toggleUnderline(editor);
-});
-
-// Bullets
-document.getElementById('bulletButton').addEventListener('click', function() {
-    roosterjs.toggleBullet(editor);
-});
-
-// Numbering
-document.getElementById('numberingButton').addEventListener('click', function() {
-    roosterjs.toggleNumbering(editor);
-});
-
-// StrikeThrough
-document.getElementById('strikeThroughButton').addEventListener('click', function() {
-    roosterjs.toggleStrikethrough(editor);
-});
-
-// SuperScript
-document.getElementById('superScriptButton').addEventListener('click', function() {
-    roosterjs.toggleSuperscript(editor);
-});
-
-// SubScript
-document.getElementById('subScriptButton').addEventListener('click', function() {
-    roosterjs.toggleSubscript(editor);
-});
-
-// Insert link
-document.getElementById('insertLink').addEventListener('click', function() {
-    let range = editor.getSelectionRange();
-    let url = window.prompt('Url', 'http://');
-    let text = range.collapsed ? window.prompt('Text of link', url) : null;
-    roosterjs.createLink(editor, url, url, text);
-});
-
-// ClearFormat
-document.getElementById('clearFormatButton').addEventListener('click', function() {
-    roosterjs.clearFormat(editor);
-});
-
-// Indent
-document.getElementById('indentButton').addEventListener('click', function() {
-    roosterjs.setIndentation(editor, 0);
-});
-
-// Outdent
-document.getElementById('outdentButton').addEventListener('click', function() {
-    roosterjs.setIndentation(editor, 1);
-});
-
-// AlignLeft
-document.getElementById('alignLeftButton').addEventListener('click', function() {
-    roosterjs.setAlignment(editor, 0);
-});
-
-// AlignCenter
-document.getElementById('alignCenterButton').addEventListener('click', function() {
-    roosterjs.setAlignment(editor, 1);
-});
-
-// AlignRight
-document.getElementById('alignRightButton').addEventListener('click', function() {
-    roosterjs.setAlignment(editor, 2);
-});
-
-// undo
-document.getElementById('undoButton').addEventListener('click', function() {
-    editor.focus();
-    editor.undo();
-});
-
-// redo
-document.getElementById('redoButton').addEventListener('click', function() {
-    editor.focus();
-    editor.redo();
-});
-
-// font name
-document.getElementById('fontNameButton').addEventListener('change', function () {
-    var select = document.getElementById('fontNameButton');
-    var text = select.value;
-    if (text) {
-        roosterjs.setFontName(editor, text);
-    }
-    select.value = '';
-});
-
-// font size
-document.getElementById('fontSizeButton').addEventListener('change', function () {
-    var select = document.getElementById('fontSizeButton');
-    var text = select.value;
-    if (text) {
-        roosterjs.setFontSize(editor, text + 'px');
-    }
-    select.value = '';
-});
-
-// text color
-document.getElementById('textColorButton').addEventListener('change', function () {
-    var select = document.getElementById('textColorButton');
-    var text = select.value;
-    if (text) {
-        roosterjs.setTextColor(editor, text);
-    }
-    select.value = '';
-});
-
-// back color
-document.getElementById('backColorButton').addEventListener('change', function () {
-    var select = document.getElementById('backColorButton');
-    var text = select.value;
-    if (text) {
-        roosterjs.setBackgroundColor(editor, text);
-    }
-    select.value = '';
-});
-                        </xmp>
                     </div>
                 </div>
             </div>
