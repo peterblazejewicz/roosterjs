@@ -1,18 +1,11 @@
-export { default as NodeBlockElement } from './blockElements/NodeBlockElement';
-export { default as StartEndBlockElement } from './blockElements/StartEndBlockElement';
-
-export { default as ContentTraverser } from './contentTraverser/ContentTraverser';
-
 export {
+    NodeBlockElement,
+    StartEndBlockElement,
     getBlockElementAtNode,
     getFirstBlockElement,
     getLastBlockElement,
     getNextBlockElement,
     getPreviousBlockElement,
-} from './domWalker/getBlockElement';
-export { getNextLeafSibling, getPreviousLeafSibling } from './domWalker/getLeafSibling';
-export { getFirstLeafNode, getLastLeafNode } from './domWalker/getLeafNode';
-export {
     getFirstInlineElement,
     getLastInlineElement,
     getInlineElementAtNode,
@@ -20,7 +13,12 @@ export {
     getPreviousInlineElement,
     getInlineElementBeforePoint,
     getInlineElementAfterPoint,
-} from './domWalker/getInlineElement';
+} from './blockElements/BlockElement';
+
+export { default as ContentTraverser } from './contentTraverser/ContentTraverser';
+
+export { getNextLeafSibling, getPreviousLeafSibling } from './domWalker/getLeafSibling';
+export { getFirstLeafNode, getLastLeafNode } from './domWalker/getLeafNode';
 
 export {
     default as DefaultInlineElementResolver,
@@ -46,9 +44,11 @@ export { default as getComputedStyle } from './utils/getComputedStyle';
 export { default as getTagOfNode } from './utils/getTagOfNode';
 export { default as isBlockElement } from './utils/isBlockElement';
 export { default as isDocumentPosition } from './utils/isDocumentPosition';
+export { default as isNodeEmpty } from './utils/isNodeEmpty';
 export { default as isTextualInlineElement } from './utils/isTextualInlineElement';
 export { default as matchWhiteSpaces } from './utils/matchWhiteSpaces';
 export { default as normalizeEditorPoint } from './utils/normalizeEditorPoint';
+export { default as splitParentNode } from './utils/splitParentNode';
 export { default as unwrap } from './utils/unwrap';
 export { default as wrap } from './utils/wrap';
 export { default as wrapAll } from './utils/wrapAll';

@@ -1,11 +1,10 @@
 import CursorData from '../cursor/CursorData';
-import defaultLinkMatchRules from '../linkMatch/defaultLinkMatchRules';
 import execFormatWithUndo from './execFormatWithUndo';
 import isSelectionCollapsed from '../cursor/isSelectionCollapsed';
 import matchLink from '../linkMatch/matchLink';
-import { LinkMatchOption } from 'roosterjs-editor-types';
 import { Editor } from 'roosterjs-editor-core';
 import { LinkInlineElement } from 'roosterjs-editor-dom';
+import { PluginEvent, PluginEventType } from 'roosterjs-editor-types';
 
 // Regex matching Uri scheme
 const URI_REGEX = /^[a-zA-Z]+:/i;
@@ -32,7 +31,7 @@ function applyLinkPrefix(url: string): string {
             prefix = 'ftp://';
         } else {
             // fallback to http://
-            prefix = 'http' + '://';
+            prefix = 'http://';
         }
     }
 
@@ -61,7 +60,7 @@ export default function createLink(
     let url = link ? link.trim() : '';
     if (url) {
         let formatter: () => void = null;
-        let linkData = matchLink(url, LinkMatchOption.Exact, defaultLinkMatchRules);
+        let linkData = matchLink(url);
         // matchLink can match most links, but not all, i.e. if you pass link a link as "abc", it won't match
         // we know in that case, users will want to insert a link like http://abc
         // so we have separate logic in applyLinkPrefix to add link prefix depending on the format of the link
@@ -69,9 +68,10 @@ export default function createLink(
         // if the link starts with ftp.xxx, we will add ftp:// link. For more, see applyLinkPrefix
         let normalizedUrl = linkData ? linkData.normalizedUrl : applyLinkPrefix(url);
         let originalUrl = linkData ? linkData.originalUrl : normalizedUrl;
+        let anchor: HTMLAnchorElement = null;
 
         if (isSelectionCollapsed(editor)) {
-            let anchor = editor.getDocument().createElement('A') as HTMLAnchorElement;
+            anchor = editor.getDocument().createElement('A') as HTMLAnchorElement;
             anchor.textContent = displayText || originalUrl;
             anchor.href = normalizedUrl;
             if (altText) {
@@ -83,27 +83,32 @@ export default function createLink(
             /* the selection is not collapsed, use browser execCommand */
             formatter = () => {
                 editor.getDocument().execCommand('createLink', false, normalizedUrl);
-                // The link is created first, and then we apply altText if user asks
-                if (altText) {
-                    let cursorData = new CursorData(editor);
-                    // The link remains selected after it is applied. To get the link, need to read
-                    // The inline element after cursor since cursor always points to start of selection
-                    // There can also be cases that users select text across multiple lines causing mulitple links
-                    // to be created (one per line). This means the alttext will only be applied to first link
-                    // This is less a case. For simplicity, we just that case for the moment
-                    let inlineBeforeCursor = cursorData.inlineElementAfterCursor;
-                    if (inlineBeforeCursor && inlineBeforeCursor instanceof LinkInlineElement) {
-                        (inlineBeforeCursor.getContainerNode() as HTMLAnchorElement).setAttribute(
-                            'alt',
-                            altText
-                        );
+                let cursorData = new CursorData(editor);
+                // The link remains selected after it is applied. To get the link, need to read
+                // The inline element after cursor since cursor always points to start of selection
+                // There can also be cases that users select text across multiple lines causing mulitple links
+                // to be created (one per line). This means the alttext will only be applied to first link
+                // This is less a case. For simplicity, we just that case for the moment
+                let inlineBeforeCursor = cursorData.inlineElementAfterCursor;
+                if (inlineBeforeCursor && inlineBeforeCursor instanceof LinkInlineElement) {
+                    anchor = inlineBeforeCursor.getContainerNode() as HTMLAnchorElement;
+                    // The link is created first, and then we apply altText if user asks
+                    if (altText) {
+                        anchor.setAttribute('alt', altText);
                     }
                 }
             };
         }
 
-        if (formatter) {
-            execFormatWithUndo(editor, formatter);
-        }
+        execFormatWithUndo(editor, formatter);
+
+        editor.triggerEvent(
+            {
+                eventType: PluginEventType.ContentChanged,
+                source: 'CreateLink',
+                data: anchor,
+            } as PluginEvent,
+            true /* broadcast */
+        );
     }
 }

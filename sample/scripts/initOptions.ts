@@ -1,10 +1,16 @@
 import ShowCursorPosition from './plugins/ShowCursorPosition';
 import ShowFromState from './plugins/ShowFormatState';
 import { DefaultFormat } from 'roosterjs-editor-types';
-import { DefaultShortcut, HyperLink, PasteManager, TabIndent } from 'roosterjs-editor-plugins';
+import {
+    DefaultShortcut,
+    HyperLink,
+    PasteManager,
+    ContentEdit,
+    Watermark,
+} from 'roosterjs-editor-plugins';
+import { ImageResizePlugin } from 'roosterjs-plugin-image-resize';
 import { Editor, EditorPlugin, EditorOptions } from 'roosterjs-editor-core';
 import { setCurrentEditor } from './currentEditor';
-import { Watermark } from 'roosterjs-plugin-watermark';
 import getCurrentEditor from './currentEditor';
 
 function initOptions() {
@@ -15,6 +21,8 @@ function initOptions() {
 }
 
 function initEditorForOptions() {
+    setCurrentEditor(null);
+
     let plugins: EditorPlugin[] = [];
     if ((document.getElementById('defaultShortcutCheckbox') as HTMLInputElement).checked) {
         plugins.push(new DefaultShortcut());
@@ -25,12 +33,16 @@ function initEditorForOptions() {
     if ((document.getElementById('pasteManagerCheckbox') as HTMLInputElement).checked) {
         plugins.push(new PasteManager());
     }
-    if ((document.getElementById('tabIndentCheckbox') as HTMLInputElement).checked) {
-        plugins.push(new TabIndent());
+    if ((document.getElementById('contentEditCheckbox') as HTMLInputElement).checked) {
+        plugins.push(new ContentEdit());
     }
 
     if ((document.getElementById('watermarkCheckbox') as HTMLInputElement).checked) {
         plugins.push(new Watermark('Type content here...'));
+    }
+
+    if ((document.getElementById('imageResizeCheckbox') as HTMLInputElement).checked) {
+        plugins.push(new ImageResizePlugin());
     }
 
     plugins.push(new ShowCursorPosition(document.getElementById('cursorPosition')));

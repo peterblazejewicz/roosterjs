@@ -39,10 +39,12 @@ import {
     applyFormat,
     contains,
     fromHtml,
+    getComputedStyle,
     getInlineElementAtNode,
     getFirstLeafNode,
     getFirstBlockElement,
     getTagOfNode,
+    isNodeEmpty,
     normalizeEditorPoint,
     wrapAll,
 } from 'roosterjs-editor-dom';
@@ -60,31 +62,38 @@ export default class Editor {
     private undoService: UndoService;
     private isInIMESequence: boolean;
     private suspendAddingUndoSnapshot: boolean;
+    private disableRestoreSelectionOnFocus: boolean;
+    private omitContentEditableAttributeChanges: boolean;
+    private disposed: boolean;
 
     /**
      * Creates an instance of Editor
      * @param contentDiv The DIV HTML element which will be the container element of editor
      * @param options An optional options object to customize the editor
      */
-    constructor(private contentDiv: HTMLDivElement, options: EditorOptions = {}) {
+    constructor(private contentDiv: HTMLDivElement, options?: EditorOptions) {
         // 1. Make sure all parameters are valid
-        if (
-            !contentDiv ||
-            !(contentDiv instanceof HTMLDivElement) ||
-            contentDiv.tagName.toUpperCase() != 'DIV'
-        ) {
+        if (getTagOfNode(contentDiv) != 'DIV') {
             throw new Error('contentDiv must be an HTML DIV element');
         }
 
         // 2. Store options values to local variables
-        this.defaultFormat = options.defaultFormat;
+        options = options || {};
+        this.setDefaultFormat(options.defaultFormat);
+        this.disableRestoreSelectionOnFocus = options.disableRestoreSelectionOnFocus;
+        this.omitContentEditableAttributeChanges = options.omitContentEditableAttributeChanges;
         this.plugins = options.plugins || [];
 
         // 3. Initialize plugins
         this.initializePlugins();
 
         // 4. Ensure initial content and its format
-        this.ensureInitialContent(options.initialContent);
+        if (options.initialContent) {
+            this.setContent(options.initialContent);
+        } else if (this.contentDiv.innerHTML != '') {
+            this.triggerContentChangedEvent();
+        }
+        this.ensureInitialContent();
 
         // 5. Initialize undo service
         // This need to be after step 4 so that undo service can pickup initial content
@@ -92,16 +101,28 @@ export default class Editor {
         this.undoService.initialize(this);
         this.plugins.push(this.undoService);
 
-        // 6. Finally make the container editalbe, set its selection styles and bind events
-        this.contentDiv.setAttribute('contenteditable', 'true');
-        let styles = this.contentDiv.style;
-        styles.userSelect = styles.msUserSelect = styles.webkitUserSelect = 'text';
+        // 6. Finally make the container editable, set its selection styles and bind events
+        if (!this.omitContentEditableAttributeChanges) {
+            this.contentDiv.setAttribute('contenteditable', 'true');
+            let styles = this.contentDiv.style;
+            styles.userSelect = styles.msUserSelect = styles.webkitUserSelect = 'text';
+        }
         this.bindEvents();
     }
 
     public dispose(): void {
+        this.disposed = true;
         this.disposePlugins();
         this.unbindEvents();
+        if (!this.omitContentEditableAttributeChanges) {
+            let styles = this.contentDiv.style;
+            styles.userSelect = styles.msUserSelect = styles.webkitUserSelect = '';
+            this.contentDiv.removeAttribute('contenteditable');
+        }
+    }
+
+    public isDisposed(): boolean {
+        return this.disposed;
     }
 
     public getSelectionRange(): Range {
@@ -224,14 +245,11 @@ export default class Editor {
 
     public setContent(content: string): void {
         this.contentDiv.innerHTML = content || '';
-        this.ensureInitialContent();
-        this.triggerEvent(
-            {
-                eventType: PluginEventType.ContentChanged,
-                source: 'SetContent',
-            } as PluginEvent,
-            true /* broadcast */
-        );
+        this.triggerContentChangedEvent();
+    }
+
+    public isEmpty(trim?: boolean): boolean {
+        return isNodeEmpty(this.contentDiv, trim);
     }
 
     public getTextContent(): string {
@@ -241,7 +259,7 @@ export default class Editor {
     // Insert content into editor
     public insertContent(content: string, option?: InsertOption): void {
         if (content) {
-            let allNodes = fromHtml(content);
+            let allNodes = fromHtml(content, this.getDocument());
             // If it is to insert on new line, and there are more than one node in the collection, wrap all nodes with
             // a parent DIV before calling insertNode on each top level sub node. Otherwise, every sub node may get wrapped
             // separately to show up on its own line
@@ -286,6 +304,9 @@ export default class Editor {
                     node,
                     option
                 );
+                break;
+            case ContentPosition.Outside:
+                this.contentDiv.parentNode.insertBefore(node, this.contentDiv.nextSibling);
                 break;
         }
 
@@ -446,11 +467,17 @@ export default class Editor {
         return getCursorRect(this.contentDiv);
     }
 
+    // Get default format of this editor
+    public getDefaultFormat(): DefaultFormat {
+        return this.defaultFormat;
+    }
+
     private bindEvents(): void {
         this.isBeforeDeactivateEventSupported = browserData.isIE || browserData.isEdge;
         this.contentDiv.addEventListener('keypress', this.onKeyPress);
         this.contentDiv.addEventListener('keydown', this.onKeyDown);
         this.contentDiv.addEventListener('keyup', this.onKeyUp);
+        this.contentDiv.addEventListener('mousedown', this.onMouseDown);
         this.contentDiv.addEventListener('mouseup', this.onMouseUp);
         this.contentDiv.addEventListener('compositionstart', this.onCompositionStart);
         this.contentDiv.addEventListener('compositionend', this.onCompositionEnd);
@@ -473,6 +500,7 @@ export default class Editor {
         this.contentDiv.removeEventListener('keypress', this.onKeyPress);
         this.contentDiv.removeEventListener('keydown', this.onKeyDown);
         this.contentDiv.removeEventListener('keyup', this.onKeyUp);
+        this.contentDiv.removeEventListener('mousedown', this.onMouseDown);
         this.contentDiv.removeEventListener('mouseup', this.onMouseUp);
         this.contentDiv.removeEventListener('compositionstart', this.onCompositionStart);
         this.contentDiv.removeEventListener('compositionend', this.onCompositionEnd);
@@ -547,7 +575,7 @@ export default class Editor {
                 // Only reason we don't get the selection block is that we have an empty content div
                 // which can happen when users removes everything (i.e. select all and DEL, or backspace from very end to begin)
                 // The fix is to add a DIV wrapping, apply default format and move cursor over
-                let nodes = fromHtml(HTML_EMPTY_DIV_BLOCK);
+                let nodes = fromHtml(HTML_EMPTY_DIV_BLOCK, this.getDocument());
                 let element = this.contentDiv.appendChild(nodes[0]) as HTMLElement;
                 applyFormat(element, this.defaultFormat);
                 // element points to a wrapping node we added "<div><br></div>". We should move the selection left to <br>
@@ -596,6 +624,10 @@ export default class Editor {
         this.dispatchDomEventToPlugin(PluginEventType.CompositionEnd, event);
     };
 
+    private onMouseDown = (event: MouseEvent) => {
+        this.dispatchDomEventToPlugin(PluginEventType.MouseDown, event);
+    };
+
     private onMouseUp = (event: MouseEvent) => {
         this.dispatchDomEventToPlugin(PluginEventType.MouseUp, event);
     };
@@ -618,7 +650,7 @@ export default class Editor {
 
     private onFocus = (event: FocusEvent) => {
         // Restore the last saved selection first
-        if (this.cachedSelectionRange) {
+        if (this.cachedSelectionRange && !this.disableRestoreSelectionOnFocus) {
             this.restoreLastSavedSelection();
         }
 
@@ -637,18 +669,13 @@ export default class Editor {
     }
 
     // Ensure initial content exist in editor
-    private ensureInitialContent(initialContent?: string): void {
-        // Use the initial content to overwrite any existing content if specified
-        if (initialContent) {
-            this.setContent(initialContent);
-        }
-
+    private ensureInitialContent(): void {
         let firstBlock = getFirstBlockElement(this.contentDiv, this.inlineElementFactory);
         let defaultFormatBlockElement: HTMLElement;
 
         if (!firstBlock) {
             // No first block, let's create one
-            let nodes = fromHtml(HTML_EMPTY_DIV_BLOCK);
+            let nodes = fromHtml(HTML_EMPTY_DIV_BLOCK, this.getDocument());
             defaultFormatBlockElement = this.contentDiv.appendChild(nodes[0]) as HTMLElement;
         } else if (firstBlock instanceof NodeBlockElement) {
             // There is a first block and it is a Node (P, DIV etc.) block
@@ -732,5 +759,28 @@ export default class Editor {
         }
 
         return selectionRestored;
+    }
+
+    private setDefaultFormat(format: DefaultFormat) {
+        this.defaultFormat = format || {};
+        this.defaultFormat.fontFamily =
+            this.defaultFormat.fontFamily || getComputedStyle(this.contentDiv, 'font-family');
+        this.defaultFormat.fontSize =
+            this.defaultFormat.fontSize || getComputedStyle(this.contentDiv, 'font-size');
+        this.defaultFormat.textColor =
+            this.defaultFormat.textColor || getComputedStyle(this.contentDiv, 'color');
+        this.defaultFormat.backgroundColor =
+            this.defaultFormat.backgroundColor ||
+            getComputedStyle(this.contentDiv, 'background-color');
+    }
+
+    private triggerContentChangedEvent() {
+        this.triggerEvent(
+            {
+                eventType: PluginEventType.ContentChanged,
+                source: 'SetContent',
+            } as PluginEvent,
+            true /* broadcast */
+        );
     }
 }

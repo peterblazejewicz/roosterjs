@@ -11,15 +11,12 @@ export default function wrapAll(nodes: Node[], htmlFragment: string): Node {
     let wrapper = parentNode;
 
     if (htmlFragment) {
-        wrapper = fromHtml(htmlFragment)[0];
+        wrapper = fromHtml(htmlFragment, nodes[0].ownerDocument)[0];
         if (parentNode) {
             parentNode.insertBefore(wrapper, nodes[0]);
         }
 
         for (let i = 0; i < nodes.length; i++) {
-            if (parentNode) {
-                parentNode.removeChild(nodes[i]);
-            }
             wrapper.appendChild(nodes[i]);
         }
     }

@@ -1,6 +1,8 @@
 import {
     clearFormat,
     createLink,
+    insertImage,
+    insertTable,
     toggleBold,
     toggleItalic,
     toggleUnderline,
@@ -16,6 +18,8 @@ import {
     setTextColor,
     setBackgroundColor,
     toggleBlockQuote,
+    removeLink,
+    toggleHeader,
 } from 'roosterjs-editor-api';
 import { Alignment, Indentation } from 'roosterjs-editor-types';
 import getCurrentEditor from './currentEditor';
@@ -80,6 +84,37 @@ export default function initFormatBar() {
         clearFormat(getCurrentEditor());
     });
 
+    // Header
+    document.getElementById('header').addEventListener('change', function() {
+        let select = document.getElementById('header') as HTMLSelectElement;
+        let level = parseInt(select.value);
+        toggleHeader(getCurrentEditor(), level);
+        select.value = '-1';
+    });
+
+    // Insert Table
+    document.getElementById('insertTable').addEventListener('click', function() {
+        let columns = Math.min(parseInt(window.prompt('How many columns?')), 10);
+        let rows = Math.min(parseInt(window.prompt('How many rows?')), 10);
+        if (columns > 0 && rows > 0) {
+            insertTable(getCurrentEditor(), columns, rows);
+        }
+    });
+
+    // Insert Image
+    document.getElementById('insertImage').addEventListener('click', function() {
+        (document.getElementById('selectFile') as HTMLInputElement).click();
+    });
+
+    document.getElementById('selectFile').addEventListener('change', function() {
+        let input = document.getElementById('selectFile') as HTMLInputElement;
+        let file = input.files[0];
+        if (file) {
+            insertImage(getCurrentEditor(), file);
+            input.value = '';
+        }
+    });
+
     // Indent
     document.getElementById('indentButton').addEventListener('click', function() {
         setIndentation(getCurrentEditor(), Indentation.Increase);
@@ -117,6 +152,13 @@ export default function initFormatBar() {
         let editor = getCurrentEditor();
         editor.focus();
         editor.redo();
+    });
+
+    // remove link
+    document.getElementById('removeLink').addEventListener('click', function() {
+        let editor = getCurrentEditor();
+        editor.focus();
+        removeLink(editor);
     });
 
     // font name

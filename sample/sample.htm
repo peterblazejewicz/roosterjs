@@ -65,7 +65,6 @@
             .editorContainer {
                 height: 100%;
                 position: relative;
-                display: inline-block;
             }
 
             .tab {
@@ -81,47 +80,14 @@
                 position: absolute;
                 word-wrap: break-word;
                 left: 10px;
-                top: 10px;
-                bottom: 10px;
-                border: solid 2px #cccccc;
-                background-color: white;
-                overflow: auto;
-                outline: none;
-                width: 60%;
-            }
-
-            .sampleCodeContainer {
-                position: absolute;
-                word-wrap: break-word;
                 right: 10px;
                 top: 10px;
                 bottom: 10px;
-                border: solid 2px #cccccc;
+                border: solid 1px #cccccc;
                 background-color: white;
                 overflow: auto;
                 outline: none;
-                float: right;
-                width: 40%;
             }
-
-            .htmlSample {
-                word-wrap: break-word;
-                border-bottom: solid 2px #cccccc;
-                background-color: white;
-                overflow: auto;
-                outline: none;
-                height: 49%;
-            }
-
-            .jsSample {
-                word-wrap: break-word;
-                border-top: solid 2px #cccccc;
-                background-color: white;
-                overflow: auto;
-                outline: none;
-                height: 50%;
-            }
-
 
             .optionsTab {
                 display: flex;
@@ -146,6 +112,7 @@
                 RoosterJs Sample Site
                 <div class="topButtons">
                     <a href="https://github.com/microsoft/roosterjs" target="_blank">RoosterJs on GitHub</a>
+                    <a href="https://www.npmjs.com/package/roosterjs" target="_blank">RoosterJs on NPM</a>
                     <a href="https://github.com/Microsoft/roosterjs/wiki" target="_blank">Documentations</a>
                 </div>
             </div>
@@ -161,8 +128,9 @@
                         <div><input type="checkbox" id="defaultShortcutCheckbox" checked><label for="defaultShortcutCheckbox">Default Shortcut plugin</label></div>
                         <div><input type="checkbox" id="hyperlinkCheckbox" checked><label for="hyperlinkCheckbox">Hyperlink plugin</label></div>
                         <div><input type="checkbox" id="pasteManagerCheckbox" checked><label for="pasteManagerCheckbox">Paste Manager plugin</label></div>
-                        <div><input type="checkbox" id="tabIndentCheckbox" checked><label for="tabIndentCheckbox">Tab Indent plugin</label></div>
+                        <div><input type="checkbox" id="contentEditCheckbox" checked><label for="contentEditCheckbox">Tab Indent plugin</label></div>
                         <div><input type="checkbox" id="watermarkCheckbox"><label for="watermarkCheckbox">Watermark plugin</label></div>
+                        <div><input type="checkbox" id="imageResizeCheckbox" checked><label for="imageResizeCheckbox">Image Resize plugin</label></div>
                     </div>
                     <div class="optionList">
                         <div>Default Format:</div>
@@ -243,14 +211,6 @@
                         &nbsp;&nbsp;&nbsp;&nbsp;<a href="http://localhost:3000/sample/sample.htm">http://localhost:3000/sample/sample.htm</a>
                     </div>
                 </div>
-                <div class="sampleCodeContainer">
-                    <div class="htmlSample">
-                        <h2>HTML Sample Code</h2>
-                    </div>
-                    <div class="jsSample">
-                        <h2>JS Sample Code</h2>
-                    </div>
-                </div>
             </div>
             <div class="formatBar">
                 <button id="boldButton" title="Bold"><b>B</b></button>
@@ -318,12 +278,28 @@
                 <button id="superScriptButton">X<sup>2</sup></button>
                 <button id="subScriptButton">X<sub>2</sub></button>
                 &nbsp;
-                <button id="insertLink">Inert Link</button>
+                <button id="insertLink">Insert Link</button>
+                <button id="removeLink">Remove Link</button>
                 &nbsp;
                 <button id="undoButton">Undo</button>
                 <button id="redoButton">Redo</button>
                 &nbsp;
-                <button id="clearFormatButton">ClearFormat</button>
+                <button id="insertImage">Insert Image</button>
+                <button id="insertTable">Insert Table</button>
+                <input style='display: none' type='file' id='selectFile' accept='image/*'>
+                &nbsp;
+                <select id="header" title="Header">
+                    <option value="-1">Headers</option>
+                    <option value="0">No header</option>
+                    <option value="1">Header 1</option>
+                    <option value="2">Header 2</option>
+                    <option value="3">Header 3</option>
+                    <option value="4">Header 4</option>
+                    <option value="5">Header 5</option>
+                    <option value="6">Header 6</option>
+                </select>
+                &nbsp;
+                <button id="clearFormatButton">Clear Format</button>
             </div>
         </div>
     </body>

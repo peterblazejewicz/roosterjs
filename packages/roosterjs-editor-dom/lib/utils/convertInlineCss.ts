@@ -68,14 +68,17 @@ function convertThroughRegEx(sourceHtml: string): string {
 /**
  * Convert CSS from header or external, to inline CSS
  */
-export default function convertInlineCss(sourceHtml: string): string {
+export default function convertInlineCss(
+    sourceHtml: string,
+    additionalStyleNodes?: HTMLStyleElement[]
+): string {
     // Skip for empty string
     if (!sourceHtml) {
         return '';
     }
 
     // If there's no stylesheet, just return
-    if (!STYLEORLINK_REGEX.test(sourceHtml)) {
+    if (!STYLEORLINK_REGEX.test(sourceHtml) && !additionalStyleNodes) {
         return convertThroughRegEx(sourceHtml);
     }
     // Always add <!doctype html> if source html doesn't have doctype
@@ -89,8 +92,15 @@ export default function convertInlineCss(sourceHtml: string): string {
         contentDocument.write(sourceHtml);
         contentDocument.close();
 
+        let styleSheets: CSSStyleSheet[] = [];
+        for (let i = additionalStyleNodes ? additionalStyleNodes.length - 1 : -1; i >= 0; i--) {
+            styleSheets.push(additionalStyleNodes[i].sheet as CSSStyleSheet);
+        }
         for (let i = contentDocument.styleSheets.length - 1; i >= 0; i--) {
-            let styleSheet = contentDocument.styleSheets[i] as CSSStyleSheet;
+            styleSheets.push(contentDocument.styleSheets[i] as CSSStyleSheet);
+        }
+
+        for (let styleSheet of styleSheets) {
             for (let j = styleSheet.cssRules.length - 1; j >= 0; j--) {
                 // Skip any none-style rule, i.e. @page
                 let cssRule = styleSheet.cssRules[j];
@@ -114,7 +124,10 @@ export default function convertInlineCss(sourceHtml: string): string {
                             // Always put existing styles after so that they have higher priority
                             // Which means if both global style and inline style apply to the same element,
                             // inline style will have higher priority
-                            element.style.cssText = styleRule.style.cssText + element.style.cssText;
+                            element.setAttribute(
+                                'style',
+                                styleRule.style.cssText + (element.getAttribute('style') || '')
+                            );
                         }
                     }
                 }

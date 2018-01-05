@@ -62,6 +62,15 @@ export default class ShowFormatState implements EditorPlugin {
             if (formatState.canRedo) {
                 result += ' <b>CanReDo</b> ';
             }
+            if (formatState.canUnlink) {
+                result += ' <b>CanUnlink</b>';
+            }
+            if (formatState.canAddImageAltText) {
+                result += ' <b>CanAddImageAltText</b>';
+            }
+            if (formatState.headerLevel > 0) {
+                result += ` <b>Header${formatState.headerLevel}</b>`;
+            }
 
             this.resultContainer.innerHTML = result;
         }

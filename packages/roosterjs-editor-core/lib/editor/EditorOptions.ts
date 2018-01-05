@@ -8,6 +8,8 @@ interface EditorOptions {
     defaultFormat?: DefaultFormat;
     undo?: UndoService;
     initialContent?: string;
+    disableRestoreSelectionOnFocus?: boolean;
+    omitContentEditableAttributeChanges?: boolean;
 }
 
 export default EditorOptions;
